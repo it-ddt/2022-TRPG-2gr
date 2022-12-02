@@ -83,7 +83,7 @@ def levelup(hero: list) -> None:
     while hero[4] >= hero[5]:
         hero[3] += 1
         hero[5] = hero[3] * 100
-        print(f"{hero[0]} получил {hero[3]} уровень\n")
+        print(f"\n{hero[0]} получил {hero[3]} уровень\n")
 
 
 def buy_item(hero: list, price: int, item: str) -> None:
@@ -154,28 +154,11 @@ def combat_turn(attacker, defender):
 
 def start_fight(hero: list) -> None:
     """
-    Сделать врага
     Зависит ли враг от уровня героя
-    Обмен ударами, пока у всех есть жизни
     Формула аткаи и защиты?
-    После боя забрать опыт, деньги и предметы
-    Проверить левелап
     Можно ли выпить зелье в бою?
-
-    Персонаж - это список
-    [0] name - имя
-    [1] hp_now - здоровье текущее
-    [2] hp_max - здоровье максимальное
-    [3] lvl - уровень
-    [4] xp_now - опыт текущий
-    [5] xp_next - опыт до следующего уровня
-    [6] attack - сила атаки, применяется в бою
-    [7] defence - защита, применяется в бою
-    [8] luck - удача
-    [9] money - деньги
-    [10] inventory - список предметов
     """
-    enemy = make_hero(hp_now=30)
+    enemy = make_hero(hp_now=30, xp_now=100, money=25, inventory=["меч орка", "щит орка"])
     while hero[1] > 0 and enemy[1] > 0:
         os.system("cls")
         combat_turn(hero, enemy)
@@ -184,21 +167,25 @@ def start_fight(hero: list) -> None:
         show_hero(hero)
         show_hero(enemy)
         input("\nНажмите ENTER чтобы сделать следующий ход")
+    get_award(hero, enemy)
+
+
+def get_award(hero, enemy):
     os.system("cls")
     if hero[1] > 0 and enemy[1] <= 0:
-        print(f"{hero[0]} победил!")
-
+        print(f"{hero[0]} победил и получает в награду:")
+        hero[4] += enemy[4]
+        print(enemy[4], "опыта")
+        hero[9] += enemy[9]
+        print(enemy[9], "монет")
+        print("и предметы: ", end="")
+        for item in enemy[10]:
+            print(item, end=", ")
+        hero[10] += enemy[10]
+        levelup(hero)
     elif hero[1] <= 0 and enemy[1] > 0:
         print(f"{enemy[0]} победил!")
+        print("Игра должна закончиться тут!")
     else:
         print(f"{hero[0]} и {enemy[0]} пали в бою:(")
-
-
-def get_award(winner, loser):
-    """
-    TODO:
-    Победитель получает опыт соперника,
-    деньги соперника и предметы соперника.
-    Проверить левелап.
-    """
-    pass
+        print("Игра должна закончиться тут!")
