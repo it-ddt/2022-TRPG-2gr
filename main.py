@@ -189,3 +189,61 @@ def get_award(hero, enemy):
     else:
         print(f"{hero[0]} и {enemy[0]} пали в бою:(")
         print("Игра должна закончиться тут!")
+
+
+def choose_option(hero: list, text: str, options: list) -> int:
+    """
+    Принимает описание ситуации, где происходит выбор
+    Принимает список возможных вариантов
+    Спросить номер варианта у пользователя
+    Проверяет, есть ли вариант пользователя в возможных вариантах
+    Если есть, возвращает вариант пользователя
+    """
+    os.system("cls")
+    show_hero(hero)
+    print(text)
+    for num, option in enumerate(options):
+        print(f"{num}. {option}")
+    option = input("\nВведите номер варианта и нажмите ENTER: ")
+    try:  # что пробуем сделать?
+        option = int(option)
+    except:  # сработает, если try вызвал ошибку
+        print("Ошибка! Введите целое неотрицательное число")
+    else:  # выполнится, если try без ошибки
+        if option < len(options) and option > -1:
+            return option
+        else:
+            print("Такой выбор невозможен!")
+
+
+def visit_hub(hero: list) -> None:
+    text = "Герой приехал к камню, осюда идут несколько дорог"
+    options = [
+        "Купить зелье за 10 монет",
+        "Употребить первый предмет в инвентаре",
+        "Драться с разбойником",
+        "Сыграть в кости на 10 монет"
+    ]
+    option = choose_option(hero, text, options)
+    os.system("cls")
+    if option == 0:
+        buy_item(hero, 10, "зелье")
+    elif option == 1:
+        consume_item(hero, 0)
+    elif option == 2:
+        start_fight(hero)
+    elif option == 3:
+        play_dice(hero, 10)
+    else:
+        print("Такой вариант еще не сделан")
+    input("\nНажмите ENTER чтобы продолжить")
+
+
+def visit_shop(hero):
+    """
+    TODO:
+    Текст магазина
+    Опции с разными товарами и ценами
+    Покупать товары + добавить их эффекты в функцию consume_item
+    """
+    pass
