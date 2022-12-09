@@ -169,16 +169,32 @@ def start_fight(hero: list) -> None:
     Зависит ли враг от уровня героя
     Формула аткаи и защиты?
     Можно ли выпить зелье в бою?
+    TODO:
+        не показывать опцию использования предмета, если предметов нет
+        пауза между ходами, чтобы прочитать сообщения боя
+
     """
     enemy = make_hero(hp_now=30, xp_now=100, money=25, inventory=["меч орка", "щит орка"])
+    options = [
+        "Атаковать противника",
+        "Использовать предмет из инвентаря"
+    ]
     while hero[1] > 0 and enemy[1] > 0:
         os.system("cls")
-        combat_turn(hero, enemy)
+        option = choose_option(hero, "", options)
+
+        if option == 0:
+            combat_turn(hero, enemy)
+        elif option == 1:
+            idx = choose_option(hero, "", hero[10])
+            if idx is not None:
+                consume_item(hero, idx)
         combat_turn(enemy, hero)
+        
         print("")
         show_hero(hero)
         show_hero(enemy)
-        input("\nНажмите ENTER чтобы сделать следующий ход")
+    
     get_award(hero, enemy)
 
 
@@ -233,14 +249,17 @@ def visit_hub(hero: list) -> None:
     options = [
         "Заглянуть в лавку алхимика",
         "Съездить в трактир",
+        "Поехать на арену",
         "Выйти в главное меню"
     ]
     option = choose_option(hero, text, options)
     os.system("cls")
     if option == 0:
         return visit_shop(hero)
-    if option == 1:
+    elif option == 1:
         return visit_inn(hero)
+    elif option == 2:
+        return visit_arena(hero)
     else:
         print("Такой вариант еще не сделан")
     input("\nНажмите ENTER чтобы продолжить - из функции хаба")
@@ -265,8 +284,8 @@ def visit_shop(hero: list) -> None:
         return visit_hub(hero)
     else:
         print("Такого варианта нет")
+        input("\nНажмите ENTER чтобы продолжить")
         return visit_shop(hero)
-    input("\nНажмите ENTER чтобы продолжить - из функции магазина")
 
 
 def visit_inn(hero: list) -> None:
@@ -290,4 +309,16 @@ def visit_inn(hero: list) -> None:
 
 
 def visit_arena(hero: list) -> None:
-    pass
+    text = f"{hero[0]} добрался до арены. Здесь можно сразиться с разюойником."
+    options = [
+        "Начать битву с разбойником",
+        "Уйти в Хаб"
+    ]
+    option = choose_option(hero, text, options)
+    os.system("cls")
+    if option == 0:
+        start_fight(hero)
+    elif option == 1:
+        return visit_hub(hero)
+    else:
+        return visit_arena(hero)  # FIXME: нет паузы для чтения ошибки с неправильным вариантом
