@@ -157,6 +157,131 @@ def play_dice(hero: list, bet: str) -> None:
     input("\nНажмите ENTER чтобы продолжить")   
 
 
+def get_award(hero, enemy):
+    os.system("cls")
+    if hero[1] > 0 and enemy[1] <= 0:
+        print(f"{hero[0]} победил и получает в награду:")
+        hero[4] += enemy[4]
+        print(enemy[4], "опыта")
+        hero[9] += enemy[9]
+        print(enemy[9], "монет")
+        print("и предметы: ", end="")
+        for item in enemy[10]:
+            print(item, end=", ")
+        hero[10] += enemy[10]
+        levelup(hero)
+    elif hero[1] <= 0 and enemy[1] > 0:
+        print(f"{enemy[0]} победил!")
+        print("Игра должна закончиться тут!")
+    else:
+        print(f"{hero[0]} и {enemy[0]} пали в бою:(")
+        print("Игра должна закончиться тут!")
+
+
+def show_options(hero: list, options: list) -> None:
+    for num, option in enumerate(options):
+        print(f"{num}. {option}")
+
+
+def choose_option(hero: list, options: list) -> int:
+    """
+    Принимает описание ситуации, где происходит выбор
+    Принимает список возможных вариантов
+    Спросить номер варианта у пользователя
+    Проверяет, есть ли вариант пользователя в возможных вариантах
+    Если есть, возвращает вариант пользователя
+    """
+    option = input("\nВведите номер варианта и нажмите ENTER: ")
+    try:  # что пробуем сделать?
+        option = int(option)
+    except ValueError:  # сработает, если try вызвал ошибку
+        print("Ошибка! Введите целое неотрицательное число")
+    else:  # выполнится, если try без ошибки
+        if option < len(options) and option > -1:
+            return option
+        else:
+            print("Такой выбор невозможен!")
+
+
+def visit_hub(hero: list) -> None:
+    text = f"{hero[0]} приехал в Хаб, осюда идут несколько дорог"
+    options = [
+        "Заглянуть в лавку алхимика",
+        "Съездить в трактир",
+        "Поехать на арену",
+        "Выйти в главное меню"
+    ]
+    option = choose_option(hero, options)
+    os.system("cls")
+    if option == 0:
+        return visit_shop(hero)
+    elif option == 1:
+        return visit_inn(hero)
+    elif option == 2:
+        return visit_arena(hero)
+    else:
+        print("Такой вариант еще не сделан")
+    input("\nНажмите ENTER чтобы продолжить - из функции хаба")
+
+
+def visit_shop(hero: list) -> None:
+    text = f"{hero[0]} зашел в лавку алхимика. Здесь продаются зелья и странно пахнет."
+    options = [
+        "Купить зелье здоровья за 10 монет",
+        "Купить зелье силы за 20 монет",
+        "Уйти в Хаб"
+    ]
+    option = choose_option(hero, options)
+    os.system("cls")
+    if option == 0:
+        buy_item(hero, 10, "зелье здоровья")
+        return visit_shop(hero)
+    elif option == 1:
+        buy_item(hero, 20, "зелье силы")
+        return visit_shop(hero)
+    elif option == 2:
+        return visit_hub(hero)
+    else:
+        print("Такого варианта нет")
+        input("\nНажмите ENTER чтобы продолжить")
+        return visit_shop(hero)
+
+
+def visit_inn(hero: list) -> None:
+    text = f"{hero[0]} приехал в трактир, хозин предлагает сыграть в кости на деньги."
+    options = [
+        "Сыграть в кости на деньги",
+        "Уйти в Хаб"
+    ]
+    option = choose_option(hero, options)
+    os.system("cls")
+    if option == 0:
+        bet = input("\nВведите, сколько монет поставить и нажмите ENTER: ")
+        play_dice(hero, bet)
+        return visit_inn(hero)
+    elif option == 1:
+        return visit_hub(hero)
+    else:
+        print("Такого варианта нет")
+        return visit_inn(hero)
+
+
+def visit_arena(hero: list) -> None:
+    text = f"{hero[0]} добрался до арены. Здесь можно сразиться с разюойником."
+    options = [
+        "Начать битву с разбойником",
+        "Уйти в Хаб"
+    ]
+    option = choose_option(hero, options)
+    os.system("cls")
+    if option == 0:
+        start_fight(hero)
+    elif option == 1:
+        return visit_hub(hero)
+    else:
+        return visit_arena(hero)  # FIXME: нет паузы для чтения ошибки с неправильным вариантом
+
+
 def combat_turn(attacker, defender):
     if attacker[1] > 0:
         damage = attacker[6]
@@ -181,12 +306,12 @@ def start_fight(hero: list) -> None:
     ]
     while hero[1] > 0 and enemy[1] > 0:
         os.system("cls")
-        option = choose_option(hero, "", options)
+        option = choose_option(hero, options)
 
         if option == 0:
             combat_turn(hero, enemy)
         elif option == 1:
-            idx = choose_option(hero, "", hero[10])
+            idx = choose_option(hero, hero[10])
             if idx is not None:
                 consume_item(hero, idx)
         combat_turn(enemy, hero)
@@ -196,129 +321,3 @@ def start_fight(hero: list) -> None:
         show_hero(enemy)
     
     get_award(hero, enemy)
-
-
-def get_award(hero, enemy):
-    os.system("cls")
-    if hero[1] > 0 and enemy[1] <= 0:
-        print(f"{hero[0]} победил и получает в награду:")
-        hero[4] += enemy[4]
-        print(enemy[4], "опыта")
-        hero[9] += enemy[9]
-        print(enemy[9], "монет")
-        print("и предметы: ", end="")
-        for item in enemy[10]:
-            print(item, end=", ")
-        hero[10] += enemy[10]
-        levelup(hero)
-    elif hero[1] <= 0 and enemy[1] > 0:
-        print(f"{enemy[0]} победил!")
-        print("Игра должна закончиться тут!")
-    else:
-        print(f"{hero[0]} и {enemy[0]} пали в бою:(")
-        print("Игра должна закончиться тут!")
-
-
-def choose_option(hero: list, text: str, options: list) -> int:
-    """
-    Принимает описание ситуации, где происходит выбор
-    Принимает список возможных вариантов
-    Спросить номер варианта у пользователя
-    Проверяет, есть ли вариант пользователя в возможных вариантах
-    Если есть, возвращает вариант пользователя
-    """
-    os.system("cls")
-    show_hero(hero)
-    print(text)
-    for num, option in enumerate(options):
-        print(f"{num}. {option}")
-    option = input("\nВведите номер варианта и нажмите ENTER: ")
-    try:  # что пробуем сделать?
-        option = int(option)
-    except ValueError:  # сработает, если try вызвал ошибку
-        print("Ошибка! Введите целое неотрицательное число")
-    else:  # выполнится, если try без ошибки
-        if option < len(options) and option > -1:
-            return option
-        else:
-            print("Такой выбор невозможен!")
-
-
-def visit_hub(hero: list) -> None:
-    text = f"{hero[0]} приехал в Хаб, осюда идут несколько дорог"
-    options = [
-        "Заглянуть в лавку алхимика",
-        "Съездить в трактир",
-        "Поехать на арену",
-        "Выйти в главное меню"
-    ]
-    option = choose_option(hero, text, options)
-    os.system("cls")
-    if option == 0:
-        return visit_shop(hero)
-    elif option == 1:
-        return visit_inn(hero)
-    elif option == 2:
-        return visit_arena(hero)
-    else:
-        print("Такой вариант еще не сделан")
-    input("\nНажмите ENTER чтобы продолжить - из функции хаба")
-
-
-def visit_shop(hero: list) -> None:
-    text = f"{hero[0]} зашел в лавку алхимика. Здесь продаются зелья и странно пахнет."
-    options = [
-        "Купить зелье здоровья за 10 монет",
-        "Купить зелье силы за 20 монет",
-        "Уйти в Хаб"
-    ]
-    option = choose_option(hero, text, options)
-    os.system("cls")
-    if option == 0:
-        buy_item(hero, 10, "зелье здоровья")
-        return visit_shop(hero)
-    elif option == 1:
-        buy_item(hero, 20, "зелье силы")
-        return visit_shop(hero)
-    elif option == 2:
-        return visit_hub(hero)
-    else:
-        print("Такого варианта нет")
-        input("\nНажмите ENTER чтобы продолжить")
-        return visit_shop(hero)
-
-
-def visit_inn(hero: list) -> None:
-    text = f"{hero[0]} приехал в трактир, хозин предлагает сыграть в кости на деньги."
-    options = [
-        "Сыграть в кости на деньги",
-        "Уйти в Хаб"
-    ]
-    option = choose_option(hero, text, options)
-    os.system("cls")
-    if option == 0:
-        bet = input("\nВведите, сколько монет поставить и нажмите ENTER: ")
-        play_dice(hero, bet)
-        return visit_inn(hero)
-    elif option == 1:
-        return visit_hub(hero)
-    else:
-        print("Такого варианта нет")
-        return visit_inn(hero)
-    input("\nНажмите ENTER чтобы продолжить - из функции магазина")
-
-
-def visit_arena(hero: list) -> None:
-    text = f"{hero[0]} добрался до арены. Здесь можно сразиться с разюойником."
-    options = [
-        "Начать битву с разбойником",
-        "Уйти в Хаб"
-    ]
-    option = choose_option(hero, text, options)
-    os.system("cls")
-    if option == 0:
-        start_fight(hero)
-    elif option == 1:
-        return visit_hub(hero)
-    else:
-        return visit_arena(hero)  # FIXME: нет паузы для чтения ошибки с неправильным вариантом
