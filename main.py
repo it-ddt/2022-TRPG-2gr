@@ -100,29 +100,30 @@ def buy_item(hero: list, price: int, item: str) -> None:
     input("\nНажмите ENTER чтобы продолжить")
     
 
-def consume_item(hero: list, idx: str) -> None:
+def consume_item(hero: list) -> None:
     """
     Удаляет предмет из инвентаря по индексу и дает герою эффект этого предмета
     """
     os.system("cls")
-    if idx <= len(hero[10]) - 1 and idx > -1:
-        print(f"{hero[0]} употребил {hero[10][idx]}")
-        if hero[10][idx] == "зелье здоровья":
-            hero[1] += 10
-            if hero[1] > hero[2]:
-                hero[1] = hero[2]
-            print(f"{hero[0]} восстановил здоровье")  # TODO: показать, сколько очков  здоровья восстановлено
-        elif hero[10][idx] == "зелье силы":
-            hero[6] += 1
-            print(f"{hero[0]} прибавил 1 к силе атаки")
-        else:
-            print("Никакого эффекта")
-        hero[10].pop(idx)
+    show_options(hero, hero[10])
+    idx = choose_option(hero, hero[10])
+    os.system("cls")
+    if idx is not None:
+        if idx <= len(hero[10]) - 1 and idx > -1:
+            print(f"{hero[0]} употребил {hero[10][idx]}", end=", ")
+            if hero[10][idx] == "зелье здоровья":
+                hero[1] += 10
+                if hero[1] > hero[2]:
+                    hero[1] = hero[2]
+                print(f"{hero[0]} восстановил здоровье")  # TODO: показать, сколько очков  здоровья восстановлено
+            elif hero[10][idx] == "зелье силы":
+                hero[6] += 1
+                print(f"{hero[0]} прибавил 1 к силе атаки")
+            else:
+                print("Никакого эффекта")
+            hero[10].pop(idx)
     else:
         print("Нет такого индекса!")
-    input("\nНажмите ENTER чтобы продолжить")
-    
-
 
 def play_dice(hero: list, bet: str) -> None:
     """
@@ -211,6 +212,10 @@ def visit_hub(hero: list) -> None:
         "Поехать на арену",
         "Выйти в главное меню"
     ]
+    os.system("cls")
+    show_hero(hero)
+    print(text)
+    show_options(hero, options)
     option = choose_option(hero, options)
     os.system("cls")
     if option == 0:
@@ -231,6 +236,10 @@ def visit_shop(hero: list) -> None:
         "Купить зелье силы за 20 монет",
         "Уйти в Хаб"
     ]
+    os.system("cls")
+    show_hero(hero)
+    print(text)
+    show_options(hero, options)
     option = choose_option(hero, options)
     os.system("cls")
     if option == 0:
@@ -253,6 +262,10 @@ def visit_inn(hero: list) -> None:
         "Сыграть в кости на деньги",
         "Уйти в Хаб"
     ]
+    os.system("cls")
+    show_hero(hero)
+    print(text)
+    show_options(hero, options)
     option = choose_option(hero, options)
     os.system("cls")
     if option == 0:
@@ -272,6 +285,10 @@ def visit_arena(hero: list) -> None:
         "Начать битву с разбойником",
         "Уйти в Хаб"
     ]
+    os.system("cls")
+    show_hero(hero)
+    print(text)
+    show_options(hero, options)
     option = choose_option(hero, options)
     os.system("cls")
     if option == 0:
@@ -299,25 +316,31 @@ def start_fight(hero: list) -> None:
         пауза между ходами, чтобы прочитать сообщения боя
 
     """
-    enemy = make_hero(hp_now=30, xp_now=100, money=25, inventory=["меч орка", "щит орка"])
+    enemy = make_hero(hp_now=5, xp_now=100, money=25, inventory=["меч орка", "щит орка"])
     options = [
         "Атаковать противника",
         "Использовать предмет из инвентаря"
     ]
-    while hero[1] > 0 and enemy[1] > 0:
-        os.system("cls")
-        option = choose_option(hero, options)
 
+    show_hero(hero)
+    show_hero(enemy)
+
+    while hero[1] > 0 and enemy[1] > 0:
+        show_options(hero, options)
+        option = choose_option(hero, options)
+        os.system("cls")
         if option == 0:
             combat_turn(hero, enemy)
+            combat_turn(enemy, hero)
+            print("")
+            show_hero(hero)
+            show_hero(enemy)
         elif option == 1:
-            idx = choose_option(hero, hero[10])
-            if idx is not None:
-                consume_item(hero, idx)
-        combat_turn(enemy, hero)
-        
-        print("")
-        show_hero(hero)
-        show_hero(enemy)
-    
+            consume_item(hero)
+            combat_turn(enemy, hero)
+            print("")
+            show_hero(hero)
+            show_hero(enemy)
     get_award(hero, enemy)
+    input("\nНажмите ENTER чтобы продолжить")
+    return visit_arena(hero)
